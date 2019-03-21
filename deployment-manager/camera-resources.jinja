@@ -1,0 +1,38 @@
+
+
+resources:
+- type: gcp-types/storage-v1:buckets
+  name:  {{ properties["BUCKET_NAME"] }}
+  properties:
+    predefinedAcl: projectPrivate
+    projection: full
+    location: EU
+    storageClass: STANDARD
+    defaultObjectAcl:
+      - entity: project-editors-{{ env["project_number"] }}
+        role: READER
+    lifecycle:
+      rule:
+        - action:
+            type: Delete
+          condition:
+            age: 30
+            isLive: true
+    versioning:
+      enabled: false
+
+- name: facial_recognition
+  type: cloud_function.py
+  properties:
+    region: europe-west1
+    entryPoint: handler
+    availableMemoryMb: 128
+    environmentVariables:
+       SEND_GRID_API_KEY: {{ properties["SEND_GRID_API_KEY"] }}
+       SEND_GRID_DOMAIN: 
+    sourceArchiveUrl: gs://{{ properties["BUCKET_NAME"] }}/source/facial_recognition.zip
+    localUploadPath: functions/facial_recognition/
+    runtime: python37
+    triggerStorage:
+       bucketName: {{ properties["BUCKET_NAME"] }}
+       event: finalize
