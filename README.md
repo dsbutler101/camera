@@ -15,16 +15,16 @@ The installation process uses Google Cloud Deployment Manager to configure GCP a
 
 In the meantime, this guide assumes you have the following prerequisites in place for GCP:
 
-* Downloaded the latest version of the Google Cloud Platform [gcloud CLI and SDK](https://cloud.google.com/sdk/ "here")
+* Downloaded the latest version of the Google Cloud Platform [gcloud CLI and SDK](https://cloud.google.com/sdk/)
 * Created a new GCP project that the service will be deployed to
 * Created a GCP user with sufficient permissions to deploy the GCP resources to your chosen project (eg. project editor)
 * Authenticated the gcloud CLI using: `gcloud auth login <user_name>`
 * Configured the gcloud CLI with your chosen project: `gcloud config set project <project_name>`
-* Created a free trial Send Grid SMTP account via  https://signup.sendgrid.com, making a note of the API key details
+* Created a [free trial Send Grid SMTP account](https://signup.sendgrid.com) making a note of the API key details
 * Edit the deployment-manager/config.yml and update the following information:
    `SEND_GRID_API_KEY:` - enter the long API key obtained from the previous step
    `SEND_GRID_DOMAIN:` - enter the domain suffix that will be used for sending notifications details
-   `BUCKET_NAME:` - this must be globally unique (see https://cloud.google.com/storage/docs/naming)
+   `BUCKET_NAME:` - bucket name, must be [globally unique](https://cloud.google.com/storage/docs/naming)
 
 ## GCP Installation
 
