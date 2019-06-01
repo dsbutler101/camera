@@ -6,7 +6,7 @@ Sample project to demonstrate a motion/face detecting security camera running on
 
 1. Motion software runs on Raspberry Pi, detecting  movement and triggering a script to upload images to Google Cloud storage bucket (Raspberry Pi config details coming shortly)
 2. The object key (or image path) for image uses a naming convention that captures the user's email address, camera name and whether the user's mobile phone is 'home' or 'away' (eg. connected to the local WiFi network or not)
-3. Once the upload is completed, a Google Cloud Function script is triggered and uses the Google Vision API to perform facial recognition on the image only if the user's phone is 'away' (prevents images being scanned unnecessarily if the user is home)
+3. Once the upload is completed, a Google Cloud Function script is triggered and calls the Google Vision API to perform facial recognition on the image. The Raspberry Pi uses a rather hacky method to determine whether you are at home (pings mobile phone device on LAN via configurable DNS entry) and only triggers the Cloud Funtion script if you are away to save on unnecessary Vision API calls.
 4. If a face is detected an email is sent to the user via the Send Grid SMTP service with the image attached and a short note containing additional information such as the name of the camera that captured the image
 
 ## Prequisites

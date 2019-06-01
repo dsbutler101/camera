@@ -1,8 +1,7 @@
 
-
 resources:
-- type: gcp-types/storage-v1:buckets
-  name:  {{ properties["BUCKET_NAME"] }}
+- name: {{ properties["BUCKET_NAME"] }}
+  type: gcp-types/storage-v1:buckets
   properties:
     predefinedAcl: projectPrivate
     projection: full
@@ -21,6 +20,24 @@ resources:
     versioning:
       enabled: false
 
+- name: camera
+  type: bigquery.v2.dataset
+  properties:
+    datasetReference:
+      datasetId: camera
+
+- name: events
+  type: bigquery.v2.table
+  properties:
+    datasetId: $(ref.camera.datasetReference.datasetId)
+    tableReference:
+      tableId: events
+
+- name: camera-events
+  type: pubsub.v1.topic
+  properties:
+    topic: camera-events
+     
 - name: facial_recognition
   type: cloud_function.py
   properties:
@@ -36,3 +53,17 @@ resources:
     triggerStorage:
        bucketName: {{ properties["BUCKET_NAME"] }}
        event: finalize
+
+- name: pubsub_to_bigquery
+  type: cloud_function.py
+  properties:
+    region: europe-west1
+    entryPoint: handler
+    availableMemoryMb: 128
+    environmentVariables:
+       BIGQUERY_DATASET_ID: $(ref.camera.datasetReference.datasetId)
+       BIGQUERY_TABLE_ID: $(ref.events.tableReference.tableId)
+    sourceArchiveUrl: gs://{{ properties["BUCKET_NAME"] }}/source/pubsub_to_bigquery.zip
+    localUploadPath: functions/pubsub_to_bigquery/
+    runtime: python37
+    triggerTopic: $(ref.camera-events.name)

@@ -80,7 +80,8 @@ def upload_source(function, imports, local_path, source_archive_url):
                                                volume_archive_path)
 
     build_action = {
-        'name': 'upload-task',
+        #'name': 'upload-task',
+        'name': source_archive_url,
         'action': 'gcp-types/cloudbuild-v1:cloudbuild.projects.builds.create',
         'metadata':
             {
