@@ -1,0 +1,3 @@
+[submodule "deployment-manager/deploymentmanager-samples"]
+	path = deployment-manager/deploymentmanager-samples
+	url = https://github.com/GoogleCloudPlatform/deploymentmanager-samples

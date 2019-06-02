@@ -41,29 +41,35 @@ resources:
 - name: facial_recognition
   type: cloud_function.py
   properties:
-    region: europe-west1
+    codeLocation: functions/facial_recognition/
+    codeBucket: {{ properties["BUCKET_NAME"] }}
+    codeBucketObject: facial_recognition.zip
+    location: europe-west1
+    timeout: 60s
     entryPoint: handler
     availableMemoryMb: 128
     environmentVariables:
        SEND_GRID_API_KEY: {{ properties["SEND_GRID_API_KEY"] }}
-       SEND_GRID_DOMAIN: 
-    sourceArchiveUrl: gs://{{ properties["BUCKET_NAME"] }}/source/facial_recognition.zip
-    localUploadPath: functions/facial_recognition/
+       SEND_GRID_DOMAIN: {{ properties["SEND_GRID_DOMAIN"] }}
     runtime: python37
-    triggerStorage:
-       bucketName: {{ properties["BUCKET_NAME"] }}
-       event: finalize
+    eventTrigger:
+      resource: projects/{{ env['project'] }}/buckets/{{ properties["BUCKET_NAME"] }}
+      eventType: providers/cloud.storage/eventTypes/object.change
 
 - name: pubsub_to_bigquery
   type: cloud_function.py
   properties:
-    region: europe-west1
+    codeLocation: functions/facial_recognition/
+    codeBucket: {{ properties["BUCKET_NAME"] }}
+    codeBucketObject: facial_recognition.zip
+    location: europe-west1
+    timeout: 60s
     entryPoint: handler
     availableMemoryMb: 128
     environmentVariables:
        BIGQUERY_DATASET_ID: $(ref.camera.datasetReference.datasetId)
        BIGQUERY_TABLE_ID: $(ref.events.tableReference.tableId)
-    sourceArchiveUrl: gs://{{ properties["BUCKET_NAME"] }}/source/pubsub_to_bigquery.zip
-    localUploadPath: functions/pubsub_to_bigquery/
     runtime: python37
-    triggerTopic: $(ref.camera-events.name)
+    eventTrigger:
+       resource: $(ref.camera-events.name)
+       eventType: providers/cloud.pubsub/eventTypes/topic.publish
