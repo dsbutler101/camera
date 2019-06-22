@@ -1,0 +1,123 @@
+---
+ - name: download motion software package
+   get_url:
+      url: https://github.com/Motion-Project/motion/releases/download/release-4.0.1/pi_stretch_motion_4.0.1-1_armhf.deb
+      dest: /home/pi/pi_stretch_motion_4.0.1-1_armhf.deb
+
+ - name: install downloaded motion package
+   apt:
+      deb: /home/pi/pi_stretch_motion_4.0.1-1_armhf.deb
+
+# we are disabling the motion service to make it easier to run under pi user
+# to facilitate calling scripts with AWS credentials installed for user
+ - name: disable motion service and run from script
+   service:
+      name: motion
+      state: stopped
+      enabled: no
+
+ - name: copy file to start motion on boot
+   copy:
+      src: motion
+      dest: /etc/default/motion
+      owner: root
+      group: root
+      mode: 0644
+
+ - name: create motion docs folder
+   file:
+      path: /home/pi/Documents
+      state: directory
+      mode: 0750
+      owner: pi
+      group: motion
+
+ - name: create image location directory
+   file:
+      path: /home/pi/Documents/motion
+      state: directory
+      mode: 0750
+      owner: pi
+      group: motion
+
+ - name: install python-blinkt package to control led strip
+   apt:
+      name: python-blinkt
+
+ - name: clone blinkt git repo
+   git:
+      repo: https://github.com/pimoroni/blinkt
+      dest: /home/pi/blinkt
+
+ - name: install python-numpy package to allow scientific calcs
+   apt:
+      name: python-numpy
+
+ - name: install python-util package to measure system utilisation
+   apt:
+      name: python-psutil
+
+ - name: update rc.local to security light script as daemon
+   blockinfile:
+     path: /etc/rc.local
+     marker: "# {mark} ANSIBLE MOTION MANAGED BLOCK"
+     insertbefore: "exit 0"
+     content: |
+       ## run security light
+       DAEMON='/home/pi/security_light.py'
+       start-stop-daemon --start -b --exec $DAEMON --chuid pi
+
+ - name: set gpu memory as required for camera
+   lineinfile:
+      path: /boot/config.txt
+      regexp: '^gpu_mem'
+      state: present
+      line: gpu_mem=128
+
+ - name: ensure camera is enabled on boot
+   lineinfile:
+      path: /boot/config.txt
+      regexp: '^start_x'
+      state: present
+      line: start_x=1
+
+ - name: disable camera led to prevent window reflections
+   lineinfile:
+      path: /boot/config.txt
+      regexp: '^disable_camera_led'
+      state: present
+      line: disable_camera_led=1
+
+ - name: copy motion config file
+   copy:
+      src: motion.conf
+      dest: /etc/motion/motion.conf
+      owner: root
+      group: root
+      mode: 0644
+
+ - name: copy camera flash python script
+   copy:
+      src: camera_flash.py
+      dest: /home/pi/camera_flash.py
+      owner: pi
+      group: motion
+      mode: 0754
+
+ - name: copy flashing security light python script
+   copy:
+      src: security_light.py
+      dest: /home/pi/security_light.py
+      owner: pi
+      group: motion
+      mode: 0754
+
+ - name: copy python script to upload images to Google Cloud Storage
+   copy:
+      src: upload_image.py
+      dest: /home/pi/upload_image.py
+      owner: pi
+      group: motion
+      mode: 0754
+
+ - include_tasks: service.yml

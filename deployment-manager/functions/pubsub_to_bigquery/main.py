@@ -7,7 +7,7 @@ def handler(event, context):
 
    print("Event:")
    print(json.dumps(event, indent=3))
-   data = base64.b64decode(event['data'])
+   data = json.loads(base64.b64decode(event['data']))
    print("Data:")
    print(data)
 

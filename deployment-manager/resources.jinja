@@ -1,0 +1,121 @@
+resources:
+
+- name: {{ properties["BUCKET_NAME"] }}
+  type: storage.v1.bucket
+  properties:
+    predefinedAcl: projectPrivate
+    projection: full
+    location: {{ properties["REGION"] }}
+    storageClass: STANDARD
+    defaultObjectAcl:
+      - entity: project-editors-{{ env["project_number"] }}
+        role: READER
+    lifecycle:
+      rule:
+        - action:
+            type: Delete
+          condition:
+            age: 90
+            isLive: true
+    versioning:
+      enabled: false
+  accessControl:
+    gcpIamPolicy:
+      bindings:
+      - role: "roles/storage.objectCreator"
+        members:
+        - "serviceAccount:publisher@{{ env['project'] }}.iam.gserviceaccount.com"
+  metadata:
+    dependsOn:
+     - serviceaccount-publisher
+
+- name: serviceaccount-publisher
+  type: iam.v1.serviceAccount
+  properties:
+    displayName: publisher
+    accountId: publisher
+
+- name: dataset-analytics
+  type: bigquery.v2.dataset
+  properties:
+    datasetReference:
+      datasetId: analytics
+
+- name: table-events
+  type: bigquery.v2.table
+  properties:
+    datasetId: $(ref.dataset-analytics.datasetReference.datasetId)
+    tableReference:
+      tableId: events
+    schema:
+      fields:
+       - name: user
+         type: STRING
+         mode: REQUIRED
+         description: User ID used to generate event
+       - name: device
+         type: STRING
+         mode: REQUIRED
+         description: Device ID used to generate event
+       - name: event_type
+         type: STRING
+         mode: REQUIRED
+         description: Event type
+       - name: value
+         type: INTEGER
+         mode: REQUIRED
+         description: Value associated with event type
+       - name: time_stamp
+         type: TIMESTAMP
+         mode: REQUIRED
+         description: Time stamp event received
+
+- name: pubsub-events
+  type: pubsub.v1.topic
+  properties:
+    topic: events
+  accessControl:
+    gcpIamPolicy:
+      bindings:
+      - role: roles/pubsub.publisher
+        members:
+        - "serviceAccount:publisher@{{ env['project'] }}.iam.gserviceaccount.com"
+  metadata:
+    dependsOn:
+     - serviceaccount-publisher
+     
+- name: facial_recognition
+  type: cloud_function.py
+  properties:
+    codeLocation: functions/facial_recognition/
+    codeBucket: {{ properties["BUCKET_NAME"] }}
+    codeBucketObject: facial_recognition.zip
+    location: {{ properties["REGION"] }}
+    timeout: 60s
+    entryPoint: handler
+    availableMemoryMb: 128
+    environmentVariables:
+       SEND_GRID_API_KEY: {{ properties["SEND_GRID_API_KEY"] }}
+       SEND_GRID_DOMAIN: {{ properties["SEND_GRID_DOMAIN"] }}
+    runtime: python37
+    eventTrigger:
+      resource: projects/{{ env['project'] }}/buckets/{{ properties["BUCKET_NAME"] }}
+      eventType: providers/cloud.storage/eventTypes/object.change
+
+- name: pubsub_to_bigquery
+  type: cloud_function.py
+  properties:
+    codeLocation: functions/pubsub_to_bigquery/
+    codeBucket: {{ properties["BUCKET_NAME"] }}
+    codeBucketObject: pubsub_to_bigquery.zip
+    location: {{ properties["REGION"] }}
+    timeout: 60s
+    entryPoint: handler
+    availableMemoryMb: 128
+    environmentVariables:
+       BIGQUERY_DATASET_ID: $(ref.dataset-analytics.datasetReference.datasetId)
+       BIGQUERY_TABLE_ID: $(ref.table-events.tableReference.tableId)
+    runtime: python37
+    eventTrigger:
+       resource: $(ref.pubsub-events.name)
+       eventType: providers/cloud.pubsub/eventTypes/topic.publish

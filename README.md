@@ -9,7 +9,13 @@ Sample project to demonstrate a motion/face detecting security camera running on
 3. Once the upload is completed, a Google Cloud Function script is triggered and calls the Google Vision API to perform facial recognition on the image. The Raspberry Pi uses a rather hacky method to determine whether you are at home (pings mobile phone device on LAN via configurable DNS entry) and only triggers the Cloud Funtion script if you are away to save on unnecessary Vision API calls.
 4. If a face is detected an email is sent to the user via the Send Grid SMTP service with the image attached and a short note containing additional information such as the name of the camera that captured the image
 
-## Prequisites
+## Overview of Repo
+
+The repository is essentially divided in to two parts. The `deployment-manager` folder is used to deploy the 'backend' services hosted in GCP. This provides a Cloud Storage Bucket to host files, some Cloud Functions to perform facial recognition and email notification, and a BigQuery table to store all of the event data and allow you to do some analytics.
+
+The `ansible` folder is used to deploy motion sensing software to the Raspberry Pi and configure it to upload images to Google Cloud Storage for facial recognition purposes.
+
+## Backend Prequisites
 
 The installation process uses Google Cloud Deployment Manager to configure GCP and Ansible to configure the Raspberry Pi. Details of the Raspberry Pi Ansible configuration will be added shortly. 
 
@@ -29,12 +35,22 @@ In the meantime, this guide assumes you have the following prerequisites in plac
 
    `BUCKET_NAME:` - bucket name, must be [globally unique](https://cloud.google.com/storage/docs/naming)
 
-## GCP Installation
+## Backend Installation
 
 * Change to the deployment-manager directory and run the following command (use 'update' instead of 'create' for subsequent updates):
-`gcloud deployment-manager deployments create camera-resources --config config.yml`
+`gcloud deployment-manager deployments create backend --config config.yml`
+
+## Frontend Prerequisites Steps
+
+TBD
+
+## Frontend Installation Steps
+
+TBD
 
 ## To-Do
 
+* Fix issue where upload fails if object in Cloud Storage already exists
+* Add automated creation of service account with required access
 * Add instructions to complete configuration of Raspberry Pi using Ansible
 * Add instructions for allowing users to assume role that grants bucket upload access to specific locations only

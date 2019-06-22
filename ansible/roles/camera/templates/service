@@ -1,0 +1,16 @@
+[Unit]
+Description={{ role_name }}
+After=network.target
+     
+[Service]
+User=pi
+Group=pi
+EnvironmentFile=/home/pi/.{{ role_name }}
+ExecStart=/home/pi/{{ role_name }}
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier={{ role_name }}
+     
+[Install]
+WantedBy=multi-user.target
+Alias={{ role_name }}.service

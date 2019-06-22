@@ -1,0 +1,10 @@
+---
+ - name: Motion detecting raspberry pi with facial recognition
+   hosts: camera
+   become: yes
+   user: pi
+   gather_facts: no
+   roles:
+    - base
+    - camera
+    - iphone-detector

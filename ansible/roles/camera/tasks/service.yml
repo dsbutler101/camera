@@ -1,0 +1,34 @@
+ - name: configure environment variables
+   template:
+      src: environment_variables
+      dest: "/home/pi/.{{ role_name }}"
+      owner: pi
+      group: pi
+      mode: 0400
+
+ - name: source environment variables
+   lineinfile:
+      path: /home/pi/.profile
+      regexp: "/home/pi/.{{ role_name}}"
+      state: present
+      line: "while read line; do export $line; done < <(cat /home/pi/.{{ role_name}})"
+
+ - name: install service executable
+   copy:
+      src: app
+      dest: "/home/pi/{{ role_name }}"
+      owner: pi
+      group: pi
+      mode: 0755
+
+ - name: install systemd unit file
+   template:
+      src: service
+      dest: "/lib/systemd/system/{{ role_name }}.service"
+
+ - name: enable and start service
+   systemd:
+      name: "{{ role_name }}"
+      enabled: yes
+      daemon_reload: yes
+      state: restarted

@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/bin/motion -c /etc/motion/motion.conf

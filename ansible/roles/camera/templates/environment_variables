@@ -1,0 +1,3 @@
+USERNAME={{ username }}
+SERVICE_NAME={{ service_name }}
+BUCKET_NAME={{ bucket_name }}

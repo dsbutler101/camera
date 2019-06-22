@@ -1,0 +1,129 @@
+---
+ - name: set hostname
+   hostname:
+      name: "{{ service_name }}"
+
+ - name: set hostname in hosts file
+   lineinfile:
+      dest: /etc/hosts
+      regexp: '^127\.0\.1\.1'
+      line: "127.0.1.1 {{ service_name }}"
+      owner: root
+      group: root
+      mode: 0644
+
+ - name: copy rc.conf
+   copy:
+      src: rc.conf
+      dest: /etc/rc.conf
+
+ - name: copy vimrc so we can edit files nicely
+   copy:
+      src: vimrc
+      dest: "/home/pi/.vimrc"
+      owner: pi
+      group: pi
+      mode: 0644
+
+ - name: add the Google Cloud SDK as a package source
+   copy:
+      src: google-cloud-sdk.list
+      dest: /etc/apt/sources.list.d/google-cloud-sdk.list
+
+ - name: import the Google Cloud public key
+   shell: curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+ - name: add base packages required
+   apt:
+      name:
+       - git
+       - vim
+       - python-pip
+       - python3-pip
+       - python3-rpi.gpio
+       - apt-transport-https
+       - ca-certificates
+       - google-cloud-sdk
+      state: latest
+
+ - name: remove packages not required
+   apt:
+      name:
+       - wolfram-engine
+       - lxappearance
+       - lxde 
+       - lxde-common
+       - lxde-core
+       - lxde-icon-theme
+       - lxinput lxmenu-data
+       - xpanel
+       - lxpolkit
+       - lxrandr
+       - lxsession
+       - lxsession-edit
+       - lxshortcut
+       - lxtask
+       - lxterminal
+       - xinit
+       - xserver-xorg
+       - lightdm
+       - scratch
+       - midori
+       - desktop-base
+       - desktop-file-utils
+       - gnome-icon-theme
+       - gnome-themes-standard
+       - leafpad
+       - menu-xdg
+       - omxplayer
+       - xarchiver
+       - zenity
+       - tk8.5
+       - pcmanfm
+       - blt
+       - idle
+       - idle3
+       - python-tk
+       - python3-tk
+       - dillo
+       - openbox
+       - libreoffice
+       - libreoffice-*
+      state: absent
+
+ - name: update apt cache
+   apt: 
+      update_cache: yes
+
+ - name: install google cloud python libraries
+   pip:
+      name:
+       - google-cloud-storage
+       - google-cloud-pubsub
+      executable: pip3
+
+
+ - name: set vim as the default editor 
+   alternatives:
+      name: editor
+      path: /usr/bin/vim.tiny
+
+ - name: disable led activity light                                             
+   blockinfile:                                                                 
+      path: /boot/config.txt                                                    
+      marker: "# {mark} ANSIBLE MANAGED BLOCK: disable activity light"          
+      content: |                                                                
+         dtparam=act_led_trigger=none                                           
+         dtparam=act_led_activelow=on 
+
+ - name: copy gcloud json key file
+   template:
+      src: key-file.json
+      dest: /home/pi/key-file.json
+      mode: 0600
+      owner: pi
+      group: pi
+
+ - name: activate service account
+   shell: "gcloud auth activate-service-account publisher@{{ project_id }}.iam.gserviceaccount.com --project {{ project_id }} --key-file /home/pi/key-file.json"
+   become: no
