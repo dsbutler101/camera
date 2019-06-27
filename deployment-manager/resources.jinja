@@ -24,16 +24,16 @@ resources:
       bindings:
       - role: "roles/storage.objectCreator"
         members:
-        - "serviceAccount:publisher@{{ env['project'] }}.iam.gserviceaccount.com"
+        - "serviceAccount:uploader@{{ env['project'] }}.iam.gserviceaccount.com"
   metadata:
     dependsOn:
-     - serviceaccount-publisher
+     - serviceaccount-uploader
 
-- name: serviceaccount-publisher
+- name: serviceaccount-uploader
   type: iam.v1.serviceAccount
   properties:
-    displayName: publisher
-    accountId: publisher
+    displayName: uploader
+    accountId: uploader
 
 - name: dataset-analytics
   type: bigquery.v2.dataset
@@ -49,26 +49,66 @@ resources:
       tableId: events
     schema:
       fields:
-       - name: user
-         type: STRING
-         mode: REQUIRED
-         description: User ID used to generate event
-       - name: device
-         type: STRING
-         mode: REQUIRED
-         description: Device ID used to generate event
-       - name: event_type
-         type: STRING
-         mode: REQUIRED
-         description: Event type
-       - name: value
-         type: INTEGER
-         mode: REQUIRED
-         description: Value associated with event type
-       - name: time_stamp
+       - name: event_time
          type: TIMESTAMP
          mode: REQUIRED
-         description: Time stamp event received
+         description: time stamp for event generated on device
+       - name: user_email
+         type: STRING
+         mode: REQUIRED
+         description: user email address camera registered to
+       - name: camera_name
+         type: STRING
+         mode: REQUIRED
+         description: name of camera device
+       - name: camera_id
+         type: INTEGER
+         mode: REQUIRED
+         description: camera device id number
+       - name: event
+         type: INTEGER
+         mode: REQUIRED
+         description: image event number
+       - name: frame
+         type: INTEGER
+         mode: REQUIRED
+         description: image frame number
+       - name: pixels_changed
+         type: INTEGER
+         mode: REQUIRED
+         description: number of pixels changed to detect motion
+       - name: noise
+         type: INTEGER
+         mode: REQUIRED
+         description: amount of noise calculated in image
+       - name: area_height
+         type: INTEGER
+         mode: REQUIRED
+         description: height of movement area in pixels
+       - name: area_width
+         type: INTEGER
+         mode: REQUIRED
+         description: width of movement area in pixels
+       - name: area_x
+         type: INTEGER
+         mode: REQUIRED
+         description: x co-ordinates of movement area
+       - name: area_y
+         type: INTEGER
+         mode: REQUIRED
+         description: y co-ordinates of movement area
+       - name: phone_at_home
+         type: BOOLEAN
+         mode: REQUIRED
+         description: Boolean flag in to indicate whether device is at home
+       - name: file_object
+         type: STRING
+         mode: NULLABLE
+         description: Object key within Cloud Storage bucket
+       - name: num_faces
+         type: INTEGER
+         mode: NULLABLE
+         description: number of faces detected in image
 
 - name: pubsub-events
   type: pubsub.v1.topic
@@ -79,29 +119,11 @@ resources:
       bindings:
       - role: roles/pubsub.publisher
         members:
-        - "serviceAccount:publisher@{{ env['project'] }}.iam.gserviceaccount.com"
+        - "serviceAccount:uploader@{{ env['project'] }}.iam.gserviceaccount.com"
   metadata:
     dependsOn:
-     - serviceaccount-publisher
+     - serviceaccount-uploader
      
-- name: facial_recognition
-  type: cloud_function.py
-  properties:
-    codeLocation: functions/facial_recognition/
-    codeBucket: {{ properties["BUCKET_NAME"] }}
-    codeBucketObject: facial_recognition.zip
-    location: {{ properties["REGION"] }}
-    timeout: 60s
-    entryPoint: handler
-    availableMemoryMb: 128
-    environmentVariables:
-       SEND_GRID_API_KEY: {{ properties["SEND_GRID_API_KEY"] }}
-       SEND_GRID_DOMAIN: {{ properties["SEND_GRID_DOMAIN"] }}
-    runtime: python37
-    eventTrigger:
-      resource: projects/{{ env['project'] }}/buckets/{{ properties["BUCKET_NAME"] }}
-      eventType: providers/cloud.storage/eventTypes/object.change
-
 - name: pubsub_to_bigquery
   type: cloud_function.py
   properties:
@@ -115,6 +137,9 @@ resources:
     environmentVariables:
        BIGQUERY_DATASET_ID: $(ref.dataset-analytics.datasetReference.datasetId)
        BIGQUERY_TABLE_ID: $(ref.table-events.tableReference.tableId)
+       BUCKET_NAME: {{ properties["BUCKET_NAME"] }}
+       SEND_GRID_API_KEY: {{ properties["SEND_GRID_API_KEY"] }}
+       SEND_GRID_DOMAIN: {{ properties["SEND_GRID_DOMAIN"] }}
     runtime: python37
     eventTrigger:
        resource: $(ref.pubsub-events.name)

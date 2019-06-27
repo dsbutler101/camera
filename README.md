@@ -50,7 +50,8 @@ TBD
 
 ## To-Do
 
+* Deal with edge case where multiple keys already exist for service account
+* Update instructions for adding parameters to ansible-vault
+* Log additional Vision outut values in bigquery
 * Fix issue where upload fails if object in Cloud Storage already exists
-* Add automated creation of service account with required access
 * Add instructions to complete configuration of Raspberry Pi using Ansible
-* Add instructions for allowing users to assume role that grants bucket upload access to specific locations only

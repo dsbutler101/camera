@@ -6,5 +6,5 @@
    gather_facts: no
    roles:
     - base
-    - camera
-    - iphone-detector
+    - motion
+    - uploader

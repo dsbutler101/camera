@@ -1,3 +1,5 @@
+IPHONE_NAME={{ iphone_name }}
 USERNAME={{ username }}
 SERVICE_NAME={{ service_name }}
 BUCKET_NAME={{ bucket_name }}
+PROJECT_ID={{ project_id }}

@@ -1,0 +1,16 @@
+---
+ - name: install uploader prerequisite python packages
+   apt:
+      name:
+       - python3-blinkt
+       - python3-numpy
+       - python3-psutil
+
+# - name: clone blinkt git repo
+#   git:
+#      repo: https://github.com/pimoroni/blinkt
+#      dest: /home/pi/blinkt
+
+ - include: service.yml
+
+ - include: key.yml
