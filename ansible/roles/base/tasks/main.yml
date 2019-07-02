@@ -1,4 +1,8 @@
 ---
+ - name: set timezone to UTC
+   timezone:
+      name: Etc/UTC
+
  - name: set hostname
    hostname:
       name: "{{ service_name }}"

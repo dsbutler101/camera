@@ -50,8 +50,13 @@ TBD
 
 ## To-Do
 
+
+* Remove need to write IPHONE-AT-HOME file to disk - store state in memory
+* create separate events when phone location changes
+* upload tado data daily in batch
+* Log additional Vision outut values in bigquery
+* Speed up security flash
 * Deal with edge case where multiple keys already exist for service account
 * Update instructions for adding parameters to ansible-vault
-* Log additional Vision outut values in bigquery
 * Fix issue where upload fails if object in Cloud Storage already exists
 * Add instructions to complete configuration of Raspberry Pi using Ansible

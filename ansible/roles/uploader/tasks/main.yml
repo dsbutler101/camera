@@ -5,11 +5,7 @@
        - python3-blinkt
        - python3-numpy
        - python3-psutil
-
-# - name: clone blinkt git repo
-#   git:
-#      repo: https://github.com/pimoroni/blinkt
-#      dest: /home/pi/blinkt
+       - python3-pil
 
  - include: service.yml
 

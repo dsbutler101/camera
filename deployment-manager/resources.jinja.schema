@@ -2,7 +2,5 @@ imports:
 
 - path: python_templates/cloud_function.py
   name: cloud_function.py
-- path: functions/facial_recognition/main.py
-- path: functions/facial_recognition/requirements.txt
 - path: functions/pubsub_to_bigquery/main.py
 - path: functions/pubsub_to_bigquery/requirements.txt

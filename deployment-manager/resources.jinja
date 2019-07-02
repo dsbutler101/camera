@@ -39,20 +39,28 @@ resources:
   type: bigquery.v2.dataset
   properties:
     datasetReference:
-      datasetId: analytics
+      datasetId: events
+    location: EU
 
 - name: table-events
   type: bigquery.v2.table
   properties:
     datasetId: $(ref.dataset-analytics.datasetReference.datasetId)
+    timePartitioning:
+      type: DAY
+      field: event_time
     tableReference:
-      tableId: events
+      tableId: camera
     schema:
       fields:
        - name: event_time
          type: TIMESTAMP
          mode: REQUIRED
          description: time stamp for event generated on device
+       - name: receive_time
+         type: TIMESTAMP
+         mode: REQUIRED
+         description: time stamp event received
        - name: user_email
          type: STRING
          mode: REQUIRED
@@ -109,6 +117,10 @@ resources:
          type: INTEGER
          mode: NULLABLE
          description: number of faces detected in image
+       - name: brightness
+         type: FLOAT
+         mode: NULLABLE
+         description: number of faces detected in image
 
 - name: pubsub-events
   type: pubsub.v1.topic
@@ -144,3 +156,6 @@ resources:
     eventTrigger:
        resource: $(ref.pubsub-events.name)
        eventType: providers/cloud.pubsub/eventTypes/topic.publish
+  metadata:
+    dependsOn:
+     - {{ properties["BUCKET_NAME"] }}

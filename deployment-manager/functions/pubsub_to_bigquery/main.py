@@ -4,6 +4,7 @@ import base64
 import json
 import smtplib
 from os import environ
+from datetime import datetime
 from google.cloud import bigquery
 from google.cloud import vision
 from google.cloud import storage
@@ -20,12 +21,11 @@ def handler(event, context):
 
    data = json.loads(base64.b64decode(event['data']).decode('utf-8'))
    print(data)
-
    for i, d in enumerate(data):
+      data[i]['receive_time'] = str(datetime.utcnow())
       if not d['phone_at_home'] and 'file_object' in d:
          user_email = d['user_email']
          camera_name = d['camera_name']
-         #phone_location = object_attr[2]
          client = vision.ImageAnnotatorClient()
          response = client.face_detection({'source': {'image_uri': d['file_object']}})
          faces = response.face_annotations
