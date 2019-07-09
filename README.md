@@ -42,12 +42,12 @@ In the meantime, this guide assumes you have the following prerequisites in plac
 
 ## Frontend Prerequisites Steps
 
-This is ideally suited the Raspberry Pi Zero W and camera mounted in the ZeroView window mount. You will need the following HW:
+This is ideally suited the Raspberry Pi Zero W with a camera mounted in the ZeroView window mount. You will need the following hardware:
 
 * Raspberry Pi Zero W
 * SD card (at least 4GB)
-* Raspberry Pi Camera
-* Raspberry Pi Camera cable
+* Raspberry Pi Camera (https://thepihut.com/products/raspberry-pi-camera-module)
+* Raspberry Pi Camera cable (https://thepihut.com/products/raspberry-pi-zero-camera-adapter)
 * ZeroView window mount (https://thepihut.com/products/zeroview)
 
 For an optional blinking security light so that people are aware the camera is active, you will also need the following. Note that unless you purchase a Pi Zero with the header preinstalled this will require soldering:
@@ -61,7 +61,7 @@ Before you start the (headless) installation you will need to initialise your SD
 
 ## Frontend Installation Steps
 
-Once your Pi is initialised you are ready to install the motion software and associated scripts for interacting with GCP. Change to a suitable directory and run the following commands to clone the reop and install the software on your Pi:
+Once your Pi is initialised you are ready to install the motion software and associated scripts for interacting with GCP. Change to a suitable directory and run the following commands to clone the repo and install the software on your Pi:
 
 `git clone https://github.com/dsbutler101/camera.git`
 
@@ -69,7 +69,7 @@ Once your Pi is initialised you are ready to install the motion software and ass
 
 `vi hosts`
 
-Replace the IP address with the IP address of your Raspberry pi on the network. Save the file.
+Update `site.yml` with the IP address of your Raspberry pi on the network:
 
 `vi site.yml`
 
@@ -85,9 +85,11 @@ Replace each of the `vars` with suitable values for your GCP project:
 
 `iphone_name: <host-name-of-your-iphone-as-it-appears-on-your-network>`
 
+Finally the install step. The script should complete successfully. Note, there may be one 'error' that is ignored due to the logic implemented to install service-account keys. You can ignore this if the subsequent steps all complete successfully:
+
 `ansible-playbook site.yml`
 
-This script will use the current GCP credentials on your workstation to create a service-account, create service-account keys and install these keys on your Pi so that it can make the necessary API calls.The role associated with the service account is carefully configure with the minimum permissions required to work. 
+This script will use the current GCP credentials on your workstation to create a service-account, create service-account keys and install the keys on your Pi so that it can make the necessary API calls.bThe role associated with the service-account is carefully configured with the minimum permissions required to work. 
 
 ## To-Do
 
