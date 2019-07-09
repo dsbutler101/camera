@@ -30,7 +30,9 @@ In the meantime, this guide assumes you have the following prerequisites in plac
 * Edit the deployment-manager/config.yml and update the following information:
 
    `SEND_GRID_API_KEY:` - enter the long API key obtained from the previous step
+
    `SEND_GRID_DOMAIN:` - enter the domain suffix that will be used for sending notifications details
+
    `BUCKET_NAME:` - bucket name, must be [globally unique](https://cloud.google.com/storage/docs/naming)
 
 ## Backend Installation
@@ -55,29 +57,37 @@ For an optional blinking security light so that people are aware the camera is a
 
 Before you start the (headless) installation you will need to initialise your SD card. This is not necessary if you Pi is already initialised and on your network. I use the handy `rpi-init` Ansible script to do this direct from a Mac as it configures both SSH and wifi without needing to write to ext4 filesystems: 
 
-* Clone the following repo `git clone https://github.com/dsbutler101/rpi-init` and following the instructions in the `README.md`
+* Clone the following repo `git clone https://github.com/dsbutler101/rpi-init` and follow the instructions in the `README.md`
 
 ## Frontend Installation Steps
 
-Once your Pi is initialised you are ready to install the motion software and associated scripts for interacting with GCP. Note this script create a service account and associated keys and installs this on your Pi. The role associated with the service account is carefully configure with the minimum permissions required to work. Change to a suitable directory and run the following commands to clone the reop and install the software on your Pi:
+Once your Pi is initialised you are ready to install the motion software and associated scripts for interacting with GCP. Change to a suitable directory and run the following commands to clone the reop and install the software on your Pi:
 
 `git clone https://github.com/dsbutler101/camera.git`
+
 `cd camera`
+
 `vi hosts`
 
 Replace the IP address with the IP address of your Raspberry pi on the network. Save the file.
+
 `vi site.yml`
 
 Replace each of the `vars` with suitable values for your GCP project:
-`project_id: <project-id-of-your-gcp-project>
-bucket_name: <bucket-name-must-be-globally-unique>
-service_name: <hostname-to-set-for-pi>
-username: <your-email-address>
-iphone_name: <host-name-of-your-iphone-as-it-appears-on-your-network>`
+
+`project_id: <project-id-of-your-gcp-project>`
+
+`bucket_name: <bucket-name-must-be-globally-unique>`
+
+`service_name: <hostname-to-set-for-pi>`
+
+`username: <your-email-address>`
+
+`iphone_name: <host-name-of-your-iphone-as-it-appears-on-your-network>`
 
 `ansible-playbook site.yml`
 
-This script will use the current GCP credentials on your workstation to create a service-account, create service-account keys and install these keys on your Pi so that it can make the necessary API calls.
+This script will use the current GCP credentials on your workstation to create a service-account, create service-account keys and install these keys on your Pi so that it can make the necessary API calls.The role associated with the service account is carefully configure with the minimum permissions required to work. 
 
 ## To-Do
 
