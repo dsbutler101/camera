@@ -1,5 +1,0 @@
-project_id: "{{ vault_project_id }}"
-bucket_name: "{{ vault_bucket_name }}"
-username: "{{ vault_username }}"
-iphone_name: "{{ vault_iphone_name }}"
-service_name: "{{ vault_service_name }}"

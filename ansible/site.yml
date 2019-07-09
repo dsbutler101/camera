@@ -1,6 +1,12 @@
 ---
  - name: Motion detecting raspberry pi with facial recognition
    hosts: camera
+   vars:
+      project_id: your-project-id
+      bucket_name: your-bucket-name
+      service_name: name-of-camera
+      username: your.email@example.com
+      iphone_name: your-iphone-dns-name
    become: yes
    user: pi
    gather_facts: no

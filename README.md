@@ -1,11 +1,11 @@
 # Motion Detecting Security Camera
 
-Sample project to demonstrate a motion/face detecting security camera running on a Raspberry Pi using  GCP Cloud Functions, Vision API integrated with Cloud Storage
+This is a sample project to demonstrate a motion/face detecting security camera running on a Raspberry Pi using GCP Cloud Functions, Vision API, integrated with Cloud Storage and BigQuery.
 
 ## How it works?
 
 1. Motion software runs on Raspberry Pi, detecting  movement and triggering a script to upload images to Google Cloud storage bucket (Raspberry Pi config details coming shortly)
-2. The object key (or image path) for image uses a naming convention that captures the user's email address, camera name and whether the user's mobile phone is 'home' or 'away' (eg. connected to the local WiFi network or not)
+2. The object key (or image path) for image uses a naming convention that captures the user's email address, camera name and whether the user's mobile phone is 'home' or 'away' (eg. connected to the local WiFi network or not).
 3. Once the upload is completed, a Google Cloud Function script is triggered and calls the Google Vision API to perform facial recognition on the image. The Raspberry Pi uses a rather hacky method to determine whether you are at home (pings mobile phone device on LAN via configurable DNS entry) and only triggers the Cloud Funtion script if you are away to save on unnecessary Vision API calls.
 4. If a face is detected an email is sent to the user via the Send Grid SMTP service with the image attached and a short note containing additional information such as the name of the camera that captured the image
 
@@ -30,9 +30,7 @@ In the meantime, this guide assumes you have the following prerequisites in plac
 * Edit the deployment-manager/config.yml and update the following information:
 
    `SEND_GRID_API_KEY:` - enter the long API key obtained from the previous step
-
    `SEND_GRID_DOMAIN:` - enter the domain suffix that will be used for sending notifications details
-
    `BUCKET_NAME:` - bucket name, must be [globally unique](https://cloud.google.com/storage/docs/naming)
 
 ## Backend Installation
@@ -42,11 +40,44 @@ In the meantime, this guide assumes you have the following prerequisites in plac
 
 ## Frontend Prerequisites Steps
 
-TBD
+This is ideally suited the Raspberry Pi Zero W and camera mounted in the ZeroView window mount. You will need the following HW:
+
+* Raspberry Pi Zero W
+* SD card (at least 4GB)
+* Raspberry Pi Camera
+* Raspberry Pi Camera cable
+* ZeroView window mount (https://thepihut.com/products/zeroview)
+
+For an optional blinking security light so that people are aware the camera is active, you will also need the following. Note that unless you purchase a Pi Zero with the header preinstalled this will require soldering:
+
+* A Blinkt LED strip (https://thepihut.com/products/blinkt)
+* Header Strip (https://thepihut.com/collections/raspberry-pi-hats/products/40-pin-2x20-hat-dual-male-headers)
+
+Before you start the (headless) installation you will need to initialise your SD card. This is not necessary if you Pi is already initialised and on your network. I use the handy `rpi-init` Ansible script to do this direct from a Mac as it configures both SSH and wifi without needing to write to ext4 filesystems: 
+
+* Clone the following repo `git clone https://github.com/dsbutler101/rpi-init` and following the instructions in the `README.md`
 
 ## Frontend Installation Steps
 
-TBD
+Once your Pi is initialised you are ready to install the motion software and associated scripts for interacting with GCP. Note this script create a service account and associated keys and installs this on your Pi. The role associated with the service account is carefully configure with the minimum permissions required to work. Change to a suitable directory and run the following commands to clone the reop and install the software on your Pi:
+
+`git clone https://github.com/dsbutler101/camera.git`
+`cd camera`
+`vi hosts`
+
+Replace the IP address with the IP address of your Raspberry pi on the network. Save the file.
+`vi site.yml`
+
+Replace each of the `vars` with suitable values for your GCP project:
+`project_id: <project-id-of-your-gcp-project>
+bucket_name: <bucket-name-must-be-globally-unique>
+service_name: <hostname-to-set-for-pi>
+username: <your-email-address>
+iphone_name: <host-name-of-your-iphone-as-it-appears-on-your-network>`
+
+`ansible-playbook site.yml`
+
+This script will use the current GCP credentials on your workstation to create a service-account, create service-account keys and install these keys on your Pi so that it can make the necessary API calls.
 
 ## To-Do
 
