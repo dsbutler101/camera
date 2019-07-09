@@ -85,14 +85,15 @@ Replace each of the `vars` with suitable values for your GCP project:
 
 `iphone_name: <host-name-of-your-iphone-as-it-appears-on-your-network>`
 
-Finally the install step. The script should complete successfully. Note, there may be one 'error' that is ignored due to the logic implemented to install service-account keys. You can ignore this if the subsequent steps all complete successfully:
+Finally the install step:
 
 `ansible-playbook site.yml`
+
+The script should complete successfully. Note, there may be one 'error' that is ignored due to the logic implemented to install service-account keys. You can ignore this if the subsequent steps all complete successfully.
 
 This script will use the current GCP credentials on your workstation to create a service-account, create service-account keys and install the keys on your Pi so that it can make the necessary API calls.bThe role associated with the service-account is carefully configured with the minimum permissions required to work. 
 
 ## To-Do
-
 
 * Remove need to write IPHONE-AT-HOME file to disk - store state in memory
 * create separate events when phone location changes
@@ -102,4 +103,3 @@ This script will use the current GCP credentials on your workstation to create a
 * Deal with edge case where multiple keys already exist for service account
 * Update instructions for adding parameters to ansible-vault
 * Fix issue where upload fails if object in Cloud Storage already exists
-* Add instructions to complete configuration of Raspberry Pi using Ansible
