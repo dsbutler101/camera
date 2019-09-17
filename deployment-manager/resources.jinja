@@ -35,12 +35,28 @@ resources:
     displayName: uploader
     accountId: uploader
 
+- name: serviceaccount-analytics
+  type: iam.v1.serviceAccount
+  properties:
+    displayName: analytics
+    accountId: analytics
+
 - name: dataset-analytics
   type: bigquery.v2.dataset
   properties:
     datasetReference:
-      datasetId: events
+      datasetId: analytics
     location: EU
+    access:
+    -  role: "roles/bigquery.admin"
+       specialGroup: "projectOwners"
+    -  role: "roles/bigquery.dataOwner"
+       userByEmail: "analytics@{{ env['project'] }}.iam.gserviceaccount.com"
+    -  role: "roles/bigquery.dataOwner"
+       userByEmail: "{{ env['project'] }}@appspot.gserviceaccount.com"
+  metadata:
+    dependsOn:
+     - serviceaccount-analytics
 
 - name: table-events
   type: bigquery.v2.table
@@ -50,7 +66,7 @@ resources:
       type: DAY
       field: event_time
     tableReference:
-      tableId: camera
+      tableId: events
     schema:
       fields:
        - name: event_time

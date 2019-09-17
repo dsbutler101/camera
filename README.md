@@ -63,15 +63,15 @@ Before you start the (headless) installation you will need to initialise your SD
 
 Once your Pi is initialised you are ready to install the motion software and associated scripts for interacting with GCP. Change to a suitable directory and run the following commands to clone the reop and install the software on your Pi:
 
-`git clone https://github.com/dsbutler101/camera.git`
+`git clone https://github.com/dsbutler101/rpi-servers.git`
 
-`cd camera`
+`cd rpi-servers`
 
 `vi hosts`
 
 Replace the IP address with the IP address of your Raspberry pi on the network. Save the file.
 
-`vi site.yml`
+`vi camera.yml`
 
 Replace each of the `vars` with suitable values for your GCP project:
 
@@ -85,7 +85,7 @@ Replace each of the `vars` with suitable values for your GCP project:
 
 `iphone_name: <host-name-of-your-iphone-as-it-appears-on-your-network>`
 
-`ansible-playbook site.yml`
+`ansible-playbook camera.yml`
 
 This script will use the current GCP credentials on your workstation to create a service-account, create service-account keys and install these keys on your Pi so that it can make the necessary API calls.The role associated with the service account is carefully configure with the minimum permissions required to work. 
 
