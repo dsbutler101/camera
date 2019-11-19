@@ -15,6 +15,7 @@ from email.mime.text import MIMEText
 
 SEND_GRID_API_KEY = environ.get('SEND_GRID_API_KEY', None)
 SEND_GRID_DOMAIN = environ.get('SEND_GRID_DOMAIN', None)
+# do we need this environment variable as we can also get this from pubsub message
 BUCKET_NAME = environ.get('BUCKET_NAME')
 
 def handler(event, context):
@@ -26,6 +27,8 @@ def handler(event, context):
       if not d['phone_at_home'] and 'file_object' in d:
          user_email = d['user_email']
          camera_name = d['camera_name']
+         url = d['file_object'].replace('gs://', '')
+         bucket_name, path = url.split('/', 1)
          client = vision.ImageAnnotatorClient()
          response = client.face_detection({'source': {'image_uri': d['file_object']}})
          faces = response.face_annotations
@@ -36,7 +39,7 @@ def handler(event, context):
             from_addr = BUCKET_NAME + "@" + SEND_GRID_DOMAIN
             client = storage.Client()
             bucket = client.get_bucket(BUCKET_NAME)
-            blob = bucket.get_blob(d['object_key'])
+            blob = bucket.get_blob(path)
             attachment = blob.download_as_string()
             msg = MIMEMultipart()
             msg['Subject'] = subject
